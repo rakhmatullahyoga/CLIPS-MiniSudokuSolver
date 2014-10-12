@@ -1,3 +1,9 @@
+;;; Version 1.2
+;;; 
+;;; JRules Changes
+
+;;; Reference Material
+;;;
 ;;; http://www.angusj.com/sudoku/hints
 ;;; http://www.scanraid.com/BasicStrategies.htm
 ;;; http://www.sudokuoftheday.com/pages/techniques-overview
@@ -14,59 +20,61 @@
    (slot column)
    (slot value)
    (slot group)
-   (slot id))
+   (slot id)
+   (slot diagonal))
    
 (deftemplate impossible
    (slot id)
    (slot value)
-   (slot priority)
+   (slot rank)
    (slot reason))
    
 (deftemplate technique-employed
    (slot reason)
-   (slot priority))
+   (slot rank))
 
 (deftemplate technique
    (slot name)
-   (slot priority))
+   (slot rank))
    
-(deffacts startup
-   (phase grid-values))
-
 (deftemplate size-value
    (slot size)
    (slot value))
    
-(deffacts values
-   (size-value (size 1) (value 1))
-   (size-value (size 2) (value 2))
-   (size-value (size 2) (value 3))
-   (size-value (size 2) (value 4))
-   (size-value (size 3) (value 5))
-   (size-value (size 3) (value 6))
-   (size-value (size 3) (value 7))
-   (size-value (size 3) (value 8))
-   (size-value (size 3) (value 9))
-   (size-value (size 4) (value 10))
-   (size-value (size 4) (value 11))
-   (size-value (size 4) (value 12))
-   (size-value (size 4) (value 13))
-   (size-value (size 4) (value 14))
-   (size-value (size 4) (value 15))
-   (size-value (size 4) (value 16))
-   (size-value (size 5) (value 17))
-   (size-value (size 5) (value 18))
-   (size-value (size 5) (value 19))
-   (size-value (size 5) (value 20))
-   (size-value (size 5) (value 21))
-   (size-value (size 5) (value 22))
-   (size-value (size 5) (value 23))
-   (size-value (size 5) (value 24))
-   (size-value (size 5) (value 25)))
+(deftemplate iterate-rc
+   (slot row)
+   (slot column)
+   (slot index)
+   (slot diagonal))
    
+(deftemplate rank
+   (slot value)
+   (slot process))
+   
+(deftemplate unsolved
+   (slot row)
+   (slot column))
+      
 ;;; ###########
 ;;; SETUP RULES
 ;;; ###########
+
+;;; **********
+;;; initialize
+;;; **********
+
+(defrule initialize
+
+   =>
+
+   (assert (phase grid-values))
+
+   (assert (size-value (size 1) (value 1)))
+   (assert (size-value (size 2) (value 2)))
+   (assert (size-value (size 2) (value 3)))
+   (assert (size-value (size 2) (value 4)))
+   (assert (size-value (size 3) (value 5)))
+   (assert (size-value (size 3) (value 6))))
 
 ;;; ***********
 ;;; stress-test
@@ -80,17 +88,17 @@
    
    (stress-test)
    
-   (priority ?last)
+   (rank (value ?last))
    
-   (not (priority ?p&:(> ?p ?last)))
+   (not (rank (value ?p&:(> ?p ?last))))
    
-   (technique (priority ?next&:(> ?next ?last)))
+   (technique (rank ?next&:(> ?next ?last)))
    
-   (not (technique (priority ?p&:(> ?p ?last)&:(< ?p ?next))))
+   (not (technique (rank ?p&:(> ?p ?last)&:(< ?p ?next))))
    
    =>
    
-   (assert (priority ?next)))
+   (assert (rank (value ?next) (process yes))))
    
 ;;; *****************
 ;;; enable-techniques
@@ -106,9 +114,30 @@
    
    (not (possible (value any)))
    
+   (not (rank))
+   
    =>
    
-   (assert (priority 1)))
+   (assert (rank (value 1) (process yes))))
+
+
+;;; ****************
+;;; expand-any-start
+;;; ****************
+
+(defrule expand-any-start
+
+   (declare (salience 10))
+
+   (phase expand-any)
+   
+   (possible (row ?r) (column ?c) (value any) (id ?id) (diagonal ?d))
+  
+   (not (possible (value any) (id ?id2&:(< ?id2 ?id)) (diagonal ?d)))
+      
+   =>
+      
+   (assert (iterate-rc (row ?r) (column ?c) (index 1) (diagonal ?d))))
 
 ;;; **********
 ;;; expand-any
@@ -120,23 +149,23 @@
 
    (phase expand-any)
    
-   ?f <- (possible (row ?r) (column ?c) (value any) (group ?g) (id ?id))
+   (possible (row ?r) (column ?c) (value any) (group ?g) (id ?id) (diagonal ?d))
   
-   (not (possible (value any) (id ?id2&:(< ?id2 ?id))))
+   (not (possible (value any) (id ?id2&:(< ?id2 ?id)) (diagonal ?d)))
    
    (size ?s)
    
+   ?f <- (iterate-rc (row ?r) (column ?c) (index ?v) (diagonal ?d))
+   
    (size-value (size ?as&:(<= ?as ?s)) (value ?v))
    
-   (not (possible (row ?r) (column ?c) (value ?v)))
-  
-   (not (and (size-value (value ?v2&:(< ?v2 ?v)))
-               
-             (not (possible (row ?r) (column ?c) (value ?v2)))))
-   
+   (not (possible (row ?r) (column ?c) (value ?v)(diagonal ?d)) )
+     
    =>
    
-   (assert (possible (row ?r) (column ?c) (value ?v) (group ?g) (id ?id))))
+   (assert (possible (row ?r) (column ?c) (value ?v) (group ?g) (id ?id) (diagonal ?d)))
+   
+   (modify ?f (index (+ ?v 1))))
    
 ;;; *****************
 ;;; position-expanded
@@ -148,17 +177,19 @@
 
    (phase expand-any)
    
-   ?f <- (possible (row ?r) (column ?c) (value any) (group ?g) (id ?id))
+   ?f1 <- (possible (row ?r) (column ?c) (value any) (diagonal ?d))
      
    (size ?s)
    
-   (not (and (size-value (size ?as&:(<= ?as ?s)) (value ?v))
+   ?f2 <- (iterate-rc (row ?r) (column ?c) (index ?v) (diagonal ?d))
    
-             (not (possible (row ?r) (column ?c) (value ?v)))))
+   (not (size-value (size ?as&:(<= ?as ?s)) (value ?v)))
 
    =>
    
-   (retract ?f))
+   (assert (unsolved (row ?r) (column ?c)))
+   
+   (retract ?f1 ?f2))
    
 ;;; ###########
 ;;; PHASE RULES
@@ -217,11 +248,11 @@
    
    (assert (phase elimination)))
 
-;;; *************
-;;; next-priority
-;;; *************
+;;; ******************
+;;; next-rank-unsolved
+;;; ******************
 
-(defrule next-priority
+(defrule next-rank-unsolved
 
    (declare (salience -20))
    
@@ -229,17 +260,45 @@
    
    (not (impossible))
    
-   (priority ?last)
+   (rank (value ?last))
    
-   (not (priority ?p&:(> ?p ?last)))
+   (not (rank (value ?p&:(> ?p ?last))))
    
-   (technique (priority ?next&:(> ?next ?last)))
+   (technique (rank ?next&:(> ?next ?last)))
    
-   (not (technique (priority ?p&:(> ?p ?last)&:(< ?p ?next))))
+   (not (technique (rank ?p&:(> ?p ?last)&:(< ?p ?next))))
+   
+   (exists (unsolved))
+      
+   =>
+      
+   (assert (rank (value ?next) (process yes))))
+
+;;; **********************
+;;; next-rank-not-unsolved
+;;; **********************
+
+(defrule next-rank-not-unsolved
+
+   (declare (salience -20))
+
+   (phase match)
+   
+   (not (impossible))
+   
+   (rank (value ?last))
+   
+   (not (rank (value ?p&:(> ?p ?last))))
+   
+   (technique (rank ?next&:(> ?next ?last)))
+   
+   (not (technique (rank ?p&:(> ?p ?last)&:(< ?p ?next))))
+   
+   (not (unsolved))
    
    =>
-   
-   (assert (priority ?next)))
+      
+   (assert (rank (value ?next) (process no))))
 
 ;;; ************
 ;;; begin-output
@@ -253,11 +312,11 @@
    
    (not (impossible))
    
-   (priority ?last)
+   (rank (value ?last))
    
-   (not (priority ?p&:(> ?p ?last)))
+   (not (rank (value ?p&:(> ?p ?last))))
 
-   (not (technique (priority ?next&:(> ?next ?last))))
+   (not (technique (rank ?next&:(> ?next ?last))))
    
    =>
    
@@ -265,17 +324,3 @@
    
    (assert (phase final-output))
    (assert (print-position 1 1)))
-
-   
-
-  
-    
-   
-   
-   
-   
-   
-   
-   
-   
-   

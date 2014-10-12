@@ -6,6 +6,7 @@ package minisudokux;
 import CLIPSJNI.*;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -13,9 +14,13 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -25,6 +30,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
     /**
      * Creates new form MiniSudoku
      */
+    Thread executionThread;
     Environment clips;
     
     // puzzle sudoku
@@ -91,8 +97,8 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         
         // inisiasi clips environment
         clips = new Environment();
-        //clips.load("sudoku.clp");
-        //clips.load("solve.clp");
+        clips.load("sudoku.clp");
+        clips.load("solve.clp");
     }
 
     /**
@@ -345,6 +351,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
     }//GEN-LAST:event_sample1ButtonActionPerformed
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
+        solveButton.setEnabled(true);
         switch(mode) {
             case 0:
                 initializePuzzle(custom);
@@ -362,11 +369,96 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void solveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_solveButtonActionPerformed
-        
+         /*==============*/
+         /* Reset CLIPS. */
+         /*==============*/
+         
+         clips.reset();
+         clips.assertString("(phase expand-any)");
+         clips.assertString("(size 3)");
+
+         /*======================================*/
+         /* Remember the initial starting values */
+         /* of the puzzle for the reset command. */
+         /*======================================*/
+         Object activeMatriks[][][] = new Object[6][2][3];
+         for (int group = 0; group < 6; group++)
+           {
+            JTable theTable = (JTable) mainGrid.getComponent(group);
+            int rowGroup = group / 2;
+            int colGroup = group % 2;
+            for (int row = 0; row < 2; row++)
+              {
+               for (int col = 0; col < 3; col++)
+                 { 
+                  activeMatriks[group][row][col] = theTable.getValueAt(row,col); 
+                  
+                  String assertStr;
+                  
+                  assertStr = "(possible (row " + (row + (rowGroup * 2) + 1) + ") " +
+                                        "(column " + (col + (colGroup * 3) + 1) + ") " +
+                                        "(group " + (group + 1) + ") " +
+                                        "(id " + ((group * 6) + (row * 2) + col + 1) + ") ";
+                                        
+                  if ((activeMatriks[group][row][col] == null) ||
+                      (activeMatriks[group][row][col].equals("")))
+                    { assertStr = assertStr + "(value any))"; }
+                  else
+                    { assertStr = assertStr + "(value " + activeMatriks[group][row][col] + "))"; }
+                    
+                  clips.assertString(assertStr);
+                 }         
+              }
+           }
+
+         /*===================================*/
+         /* Update the status of the buttons. */
+         /*===================================*/
+         
+         clearButton.setEnabled(false);
+         solveButton.setEnabled(false);
+         techniqueButton.setEnabled(false);
+         
+         /*===================*/
+         /* Solve the puzzle. */
+         /*===================*/
+
+         runSudoku();        
     }//GEN-LAST:event_solveButtonActionPerformed
 
     private void techniqueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_techniqueButtonActionPerformed
+         String evalStr;
+         String messageStr = "<html><p style=\"font-size:95%\">";
+         
+         evalStr = "(find-all-facts ((?f technique)) TRUE)";
+         
+         PrimitiveValue pv = clips.eval(evalStr);
+         int tNum = 0;
+        try {
+            tNum = pv.size();
+        } catch (Exception ex) {
+            Logger.getLogger(MiniSudoku.class.getName()).log(Level.SEVERE, null, ex);
+        }
+         
+         for (int i = 1; i <= tNum; i++)
+           {
+             try {
+                 evalStr = "(find-fact ((?f technique-employed)) " +
+                         "(eq ?f:priority " + i + "))";
+                 
+                 pv = clips.eval(evalStr);
+                 if (pv.size() == 0) continue;
+                 
+                 pv = pv.get(0);
+                 
+                 messageStr = messageStr + pv.getFactSlot("priority").intValue() + ". " +
+                         pv.getFactSlot("reason").stringValue() + "<br>";
+             } catch (Exception ex) {
+                 Logger.getLogger(MiniSudoku.class.getName()).log(Level.SEVERE, null, ex);
+             }
+           }
         
+         JOptionPane.showMessageDialog(this,messageStr,"SolutionTechniques",JOptionPane.PLAIN_MESSAGE);        
     }//GEN-LAST:event_techniqueButtonActionPerformed
 
     public void initializePuzzle(int matriks[][][]){
@@ -384,6 +476,107 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
             }
         }
     }
+   /*************/
+   /* runSudoku */
+   /*************/  
+   public void runSudoku()
+     {
+      Runnable runThread = 
+         new Runnable()
+           {
+            @Override
+            public void run()
+              {
+               clips.run();
+               
+               SwingUtilities.invokeLater(
+                  new Runnable()
+                    {
+                     public void run()
+                       {
+                        try 
+                          { updateGrid(); }
+                        catch (Exception e)
+                          { e.printStackTrace(); }
+                       }
+                    });
+              }
+           };
+      
+      isExecuting = true;
+      
+      executionThread = new Thread(runThread);
+      
+      super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+         
+      executionThread.start();
+     }
+    private void updateGrid() throws Exception
+     { 
+      /*===================================*/
+      /* Retrieve the solution from CLIPS. */
+      /*===================================*/
+      Object activeMatriks[][][] = new Object[6][2][3];
+      for(int group=0; group<6; group++) {
+            JTable theTable = (JTable) mainGrid.getComponent(group);
+            int rowGroup = group / 2;
+            int colGroup = group % 2;
+            for(int row=0; row<2; row++) {
+                for(int col=0; col<3; col++) {
+                    activeMatriks[group][row][col] = theTable.getValueAt(row,col);
+                    if ((activeMatriks[group][row][col] != null) && (!activeMatriks[group][row][col].equals("")))
+                    { continue; }
+                    //
+                    String evalStr = "(find-all-facts ((?f possible)) " +
+                                       "(and (eq ?f:row " + (row + (rowGroup * 2) + 1) + ") " +
+                                            "(eq ?f:column " + (col + (colGroup * 3) + 1) + ")))";
+                    PrimitiveValue pv = clips.eval(evalStr);
+
+                    if (pv.size() != 1) continue;
+
+                    PrimitiveValue fv = pv.get(0);
+                    theTable.setValueAt(" " + fv.getFactSlot("value") + " ",row,col);
+                }
+            }
+        }
+      
+
+      /*===============================================*/
+      /* Any cells that have not been assigned a value */
+      /* are given a '?' for their content.            */
+      /*===============================================*/
+         
+      for (int group = 0; group < 6; group++)
+        {
+         JTable theTable = (JTable) mainGrid.getComponent(group);
+
+         for (int row = 0; row < 2; row++)
+           {
+            for (int col = 0; col < 3; col++)
+              { 
+               if ((theTable.getValueAt(row,col) == null) ||
+                   (theTable.getValueAt(row,col).equals("")))
+                 { theTable.setValueAt("?",row,col);  }
+              }         
+           }
+        }
+
+      /*===================================*/
+      /* Update the status of the buttons. */
+      /*===================================*/
+
+      super.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+         
+      solved = true;
+      clearButton.setEnabled(true);
+      //resetButton.setEnabled(true);
+      solveButton.setEnabled(false);
+      techniqueButton.setEnabled(true);
+           
+      executionThread = null;
+      
+      isExecuting = false;
+     }
     /**
      * @param args the command line arguments
      */

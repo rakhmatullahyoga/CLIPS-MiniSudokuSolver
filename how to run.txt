@@ -1,3 +1,0 @@
-step2 pake clipsjni
-1. copy CLIPSJNI.dll ke direktori "C:\Program Files\Java\jdk1.7.0_25\bin"
-2. set direktori library di project properties
