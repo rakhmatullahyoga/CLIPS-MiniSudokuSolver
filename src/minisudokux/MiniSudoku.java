@@ -352,6 +352,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
         solveButton.setEnabled(true);
+        solved = false;
         switch(mode) {
             case 0:
                 initializePuzzle(custom);
