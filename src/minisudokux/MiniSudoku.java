@@ -321,6 +321,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         customButton.setSelected(true);
         initializePuzzle(custom);
         mode=0;
+        solveButton.setEnabled(true);
     }//GEN-LAST:event_customButtonActionPerformed
 
     private void sample3ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sample3ButtonActionPerformed
@@ -330,6 +331,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         customButton.setSelected(false);
         initializePuzzle(sample3);
         mode=3;
+        solveButton.setEnabled(true);
     }//GEN-LAST:event_sample3ButtonActionPerformed
 
     private void sample2ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sample2ButtonActionPerformed
@@ -339,6 +341,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         customButton.setSelected(false);
         initializePuzzle(sample2);
         mode=2;
+        solveButton.setEnabled(true);
     }//GEN-LAST:event_sample2ButtonActionPerformed
 
     private void sample1ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sample1ButtonActionPerformed
@@ -348,6 +351,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         customButton.setSelected(false);
         initializePuzzle(sample1);
         mode=1;
+        solveButton.setEnabled(true);
     }//GEN-LAST:event_sample1ButtonActionPerformed
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
@@ -397,16 +401,24 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                   String assertStr;
                   
                   assertStr = "(possible (row " + (row + (rowGroup * 2) + 1) + ") " +
-                                        "(column " + (col + (colGroup * 3) + 1) + ") " +
-                                        "(group " + (group + 1) + ") " +
-                                        "(id " + ((group * 6) + (row * 2) + col + 1) + ") ";
+                                        "(column " + (col + (colGroup * 3) + 1) + ") ";
                                         
                   if ((activeMatriks[group][row][col] == null) ||
                       (activeMatriks[group][row][col].equals("")))
-                    { assertStr = assertStr + "(value any))"; }
+                    { assertStr = assertStr + "(value any) "; }
                   else
-                    { assertStr = assertStr + "(value " + activeMatriks[group][row][col] + "))"; }
-                    
+                    { assertStr = assertStr + "(value " + activeMatriks[group][row][col] + ") "; }
+                  assertStr = assertStr  + "(group " + (group + 1) + ") " +
+                                        "(id " + ((group * 6) + (row * 2) + col + 1) + ") ";  
+                  if (col==row) {
+                      assertStr = assertStr + "(diagonal 1))";
+                  }
+                  else if (col+row==5) {
+                      assertStr = assertStr + "(diagonal 2))";
+                  }
+                  else {
+                      assertStr = assertStr + "(diagonal 3))";
+                  }
                   clips.assertString(assertStr);
                  }         
               }
@@ -527,7 +539,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                     activeMatriks[group][row][col] = theTable.getValueAt(row,col);
                     if ((activeMatriks[group][row][col] != null) && (!activeMatriks[group][row][col].equals("")))
                     { continue; }
-                    //
+                    
                     String evalStr = "(find-all-facts ((?f possible)) " +
                                        "(and (eq ?f:row " + (row + (rowGroup * 2) + 1) + ") " +
                                             "(eq ?f:column " + (col + (colGroup * 3) + 1) + ")))";
