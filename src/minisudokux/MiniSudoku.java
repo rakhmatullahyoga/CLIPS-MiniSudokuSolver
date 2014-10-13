@@ -4,6 +4,7 @@ package minisudokux;
  * @author Rakhmatullah Yoga
  */
 import CLIPSJNI.*;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -16,6 +17,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -321,6 +323,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         customButton.setSelected(true);
         initializePuzzle(custom);
         mode=0;
+        solved=false;
         solveButton.setEnabled(true);
     }//GEN-LAST:event_customButtonActionPerformed
 
@@ -374,14 +377,13 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void solveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_solveButtonActionPerformed
-         /*==============*/
-         /* Reset CLIPS. */
-         /*==============*/
-         
-         clips.reset();
-         clips.assertString("(phase expand-any)");
-         clips.assertString("(size 3)");
-
+        String buff=new String();
+        buff+="(defrule grid-values\n";
+        buff+="?f <- (phase grid-values)\n";
+        buff+="=>\n";
+        buff+="(retract ?f)\n";
+        buff+="(assert (phase expand-any))\n";
+        buff+="(assert (size 3))\n";
          /*======================================*/
          /* Remember the initial starting values */
          /* of the puzzle for the reset command. */
@@ -409,21 +411,24 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                   else
                     { assertStr = assertStr + "(value " + activeMatriks[group][row][col] + ") "; }
                   assertStr = assertStr  + "(group " + (group + 1) + ") " +
-                                        "(id " + ((group * 6) + (row * 2) + col + 1) + ") ";  
-                  if (col==row) {
+                                        "(id " + ((group * 6) + (row * 3) + col + 1) + ") ";  
+                  if ((row + (rowGroup * 2) + 1)==(col + (colGroup * 3) + 1)) {
                       assertStr = assertStr + "(diagonal 1))";
                   }
-                  else if (col+row==5) {
+                  else if ((row + (rowGroup * 2) + 1)+(col + (colGroup * 3) + 1)==7) {
                       assertStr = assertStr + "(diagonal 2))";
                   }
                   else {
                       assertStr = assertStr + "(diagonal 3))";
                   }
-                  clips.assertString(assertStr);
+                  buff+="(assert "+assertStr+")\n";
                  }         
               }
+              buff+="\n";
            }
-
+         buff+=")";
+         clips.build(buff);
+         clips.reset();
          /*===================================*/
          /* Update the status of the buttons. */
          /*===================================*/
@@ -457,14 +462,14 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
            {
              try {
                  evalStr = "(find-fact ((?f technique-employed)) " +
-                         "(eq ?f:priority " + i + "))";
+                         "(eq ?f:rank " + i + "))";
                  
                  pv = clips.eval(evalStr);
                  if (pv.size() == 0) continue;
                  
                  pv = pv.get(0);
                  
-                 messageStr = messageStr + pv.getFactSlot("priority").intValue() + ". " +
+                 messageStr = messageStr + pv.getFactSlot("rank").intValue() + ". " +
                          pv.getFactSlot("reason").stringValue() + "<br>";
              } catch (Exception ex) {
                  Logger.getLogger(MiniSudoku.class.getName()).log(Level.SEVERE, null, ex);

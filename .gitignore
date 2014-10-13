@@ -1,0 +1,7 @@
+.classpath
+.project
+.settings/org.eclipse.jdt.core.prefs
+bin/minisudokux/MiniSudoku.class
+bin/minisudokux/MiniSudoku.form
+bin/minisudokux/SudokuDemo.class
+*.class
