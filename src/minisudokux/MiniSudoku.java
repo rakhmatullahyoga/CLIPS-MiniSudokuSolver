@@ -410,10 +410,11 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                     { assertStr = assertStr + "(value " + activeMatriks[group][row][col] + ") "; }
                   assertStr = assertStr  + "(group " + (group + 1) + ") " +
                                         "(id " + ((group * 6) + (row * 2) + col + 1) + ") ";  
+                  
                   if (col==row) {
                       assertStr = assertStr + "(diagonal 1))";
                   }
-                  else if (col+row==5) {
+                  else if (col+row==7) {
                       assertStr = assertStr + "(diagonal 2))";
                   }
                   else {
