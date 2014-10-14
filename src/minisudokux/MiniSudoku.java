@@ -114,13 +114,14 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
 
         mainGrid = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        techniqueButton = new javax.swing.JButton();
+        techniquesButton = new javax.swing.JButton();
         customButton = new javax.swing.JRadioButton();
         sample3Button = new javax.swing.JRadioButton();
         sample2Button = new javax.swing.JRadioButton();
         sample1Button = new javax.swing.JRadioButton();
         clearButton = new javax.swing.JButton();
         solveButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -200,10 +201,10 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
             }
         }
 
-        techniqueButton.setText("Technique");
-        techniqueButton.addActionListener(new java.awt.event.ActionListener() {
+        techniquesButton.setText("Techniques");
+        techniquesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                techniqueButtonActionPerformed(evt);
+                techniquesButtonActionPerformed(evt);
             }
         });
 
@@ -249,6 +250,13 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
             }
         });
 
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -262,32 +270,32 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                     .addComponent(sample3Button))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(techniqueButton, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
+                    .addComponent(techniquesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
                     .addComponent(clearButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(solveButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(solveButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap(34, Short.MAX_VALUE)
-                        .addComponent(sample1Button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(sample2Button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(sample3Button))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(43, 43, 43)
-                        .addComponent(solveButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(techniqueButton)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(customButton)
+                    .addComponent(sample1Button)
+                    .addComponent(solveButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(sample2Button)
                     .addComponent(clearButton))
-                .addGap(32, 32, 32))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(sample3Button)
+                    .addComponent(jButton1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(customButton)
+                    .addComponent(techniquesButton))
+                .addGap(26, 26, 26))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -304,13 +312,13 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(36, 36, 36)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(39, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(29, 29, 29)
                 .addComponent(mainGrid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(43, 43, 43))
+                .addContainerGap(32, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -435,7 +443,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
          
          clearButton.setEnabled(false);
          solveButton.setEnabled(false);
-         techniqueButton.setEnabled(false);
+         techniquesButton.setEnabled(false);
          
          /*===================*/
          /* Solve the puzzle. */
@@ -444,7 +452,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
          runSudoku();        
     }//GEN-LAST:event_solveButtonActionPerformed
 
-    private void techniqueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_techniqueButtonActionPerformed
+    private void techniquesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_techniquesButtonActionPerformed
          String evalStr;
          String messageStr = "<html><p style=\"font-size:95%\">";
          
@@ -477,7 +485,11 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
            }
         
          JOptionPane.showMessageDialog(this,messageStr,"SolutionTechniques",JOptionPane.PLAIN_MESSAGE);        
-    }//GEN-LAST:event_techniqueButtonActionPerformed
+    }//GEN-LAST:event_techniquesButtonActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // ini tombol baru
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     public void initializePuzzle(int matriks[][][]){
         for(int group=0; group<6; group++) {
@@ -589,7 +601,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
       clearButton.setEnabled(true);
       //resetButton.setEnabled(true);
       solveButton.setEnabled(false);
-      techniqueButton.setEnabled(true);
+      techniquesButton.setEnabled(true);
            
       executionThread = null;
       
@@ -634,13 +646,14 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearButton;
     private javax.swing.JRadioButton customButton;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel mainGrid;
     private javax.swing.JRadioButton sample1Button;
     private javax.swing.JRadioButton sample2Button;
     private javax.swing.JRadioButton sample3Button;
     private javax.swing.JButton solveButton;
-    private javax.swing.JButton techniqueButton;
+    private javax.swing.JButton techniquesButton;
     // End of variables declaration//GEN-END:variables
 
     @Override
