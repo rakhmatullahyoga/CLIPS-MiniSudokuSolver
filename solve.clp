@@ -43,12 +43,12 @@
 
    =>
    
-   (assert (technique (name Naked-Single) (rank 1)))
-   (assert (technique (name Hidden-Single) (rank 2)))
+   (assert (technique (name Naked-Single) (rank 5)))
+   (assert (technique (name Hidden-Single) (rank 6)))
    (assert (technique (name Locked-Candidate-Single-Line) (rank 3)))
    (assert (technique (name Locked-Candidate-Multiple-Lines) (rank 4)))
-   (assert (technique (name Naked-Pairs) (rank 5)))
-   (assert (technique (name Hidden-Pairs) (rank 6)))
+   (assert (technique (name Naked-Pairs) (rank 1)))
+   (assert (technique (name Hidden-Pairs) (rank 2)))
    (assert (technique (name X-Wing) (rank 7)))
    (assert (technique (name Naked-Triples) (rank 8)))
    (assert (technique (name Hidden-Triples) (rank 9)))
@@ -389,10 +389,10 @@
    (assert (impossible (id ?id) (value ?v2) (rank ?p) (reason "Hidden Single"))))
 
 ;;; ********************
-;;; hidden-single-column
+;;; hidden-single-diagonal
 ;;; ********************
 
-(defrule hidden-single-column
+(defrule hidden-single-diagonal
    
    (phase match)
 
@@ -400,11 +400,11 @@
 
    (technique (name Hidden-Single) (rank ?p))
    
-   (possible (value ?v) (column ?c) (id ?id))
+   (possible (value ?v) (id ?id) (diagonal ?d &~3))
    
-   (not (possible (value ?v) (column ?c) (id ~?id)))
+   (not (possible (value ?v) (id ~?id) (diagonal ?d &~3)))
    
-   (possible (value ?v2&~?v) (column ?c) (id ?id))
+   (possible (value ?v2&~?v) (id ?id) (diagonal ?d &~3))
    
    (not (impossible (id ?id) (value ?v2) (rank ?p)))
 
@@ -617,6 +617,37 @@
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Pairs"))))
 
+;;; *****************
+;;; naked-pairs-diagonal
+;;; *****************
+
+(defrule naked-pairs-diagonal
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Naked-Pairs) (rank ?p))
+
+   (possible (value ?v1) (id ?id1) (diagonal ?d &~3))
+   
+   (possible (value ?v2&~?v1) (id ?id1) (diagonal ?d &~3))
+   
+   (not (possible (value ~?v2&~?v1) (id ?id1) (diagonal ?d &~3)))
+   
+   (possible (value ?v1) (id ?id2&~?id1) (diagonal ?d &~3))
+   
+   (possible (value ?v2) (id ?id2) (diagonal ?d &~3))
+   
+   (not (possible (value ~?v2&~?v1) (id ?id2) (diagonal ?d &~3)))
+
+   (possible (value ?v& ?v1 | ?v2) (id ?id&~?id2&~?id1) (diagonal ?d &~3))
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Pairs"))))   
+   
 ;;; ############
 ;;; Hidden Pairs
 ;;; ############
@@ -683,7 +714,7 @@
 
 
 ;;; ******************
-;;; hidden-pairs-group
+;;; hidden-pairs-diagonal
 ;;; ******************
 
 (defrule hidden-pairs-group
@@ -694,19 +725,19 @@
 
    (technique (name Hidden-Pairs) (rank ?p))
    
-   (possible (value ?v1) (group ?g) (id ?id1))
+   (possible (value ?v1) (id ?id1) (diagonal ?d &~3))
    
-   (possible (value ?v2&~?v1) (id ?id1))
+   (possible (value ?v2&~?v1) (id ?id1) (diagonal ?d &~3))
       
-   (possible (value ?v1) (group ?g) (id ?id2&~?id1))
+   (possible (value ?v1) (id ?id2&~?id1) (diagonal ?d &~3))
    
-   (possible (value ?v2) (id ?id2))
+   (possible (value ?v2) (id ?id2) (diagonal ?d &~3))
    
-   (not (possible (value ?v1 | ?v2) (group ?g) (id ~?id2&~?id1)))
+   (not (possible (value ?v1 | ?v2) (id ~?id2&~?id1) (diagonal ?d &~3)))
 
-   (possible (value ?v&~?v1&~?v2) (id ?id&?id1 | ?id2))
+   (possible (value ?v&~?v1&~?v2) (id ?id&?id1 | ?id2) (diagonal ?d &~3))
 
-   (not (impossible (id ?id) (value ?v) (rank ?p)))
+   (not (impossible (id ?id) (value ?v) (rank ?p)) (diagonal ?d &~3))
 
    =>
    

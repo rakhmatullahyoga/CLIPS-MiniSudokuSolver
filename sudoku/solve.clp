@@ -617,6 +617,37 @@
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Pairs"))))
 
+;;; *****************
+;;; naked-pairs-diagonal
+;;; *****************
+
+(defrule naked-pairs-diagonal
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Naked-Pairs) (rank ?p))
+
+   (possible (value ?v1) (group ?g) (id ?id1) (diagonal ?d &~3))
+   
+   (possible (value ?v2&~?v1) (id ?id1) (diagonal ?d &~3))
+   
+   (not (possible (value ~?v2&~?v1) (id ?id1) (diagonal ?d &~3)))
+   
+   (possible (value ?v1) (group ?g) (id ?id2&~?id1) (diagonal ?d &~3))
+   
+   (possible (value ?v2) (id ?id2) (diagonal ?d &~3))
+   
+   (not (possible (value ~?v2&~?v1) (id ?id2) (diagonal ?d &~3)))
+
+   (possible (value ?v& ?v1 | ?v2) (group ?g) (id ?id&~?id2&~?id1) (diagonal ?d &~3))
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Pairs"))))   
+   
 ;;; ############
 ;;; Hidden Pairs
 ;;; ############
