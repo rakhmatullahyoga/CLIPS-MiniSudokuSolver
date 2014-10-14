@@ -15,10 +15,13 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -250,7 +253,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
             }
         });
 
-        jButton1.setText("jButton1");
+        jButton1.setText("Browse");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -486,9 +489,100 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         
          JOptionPane.showMessageDialog(this,messageStr,"SolutionTechniques",JOptionPane.PLAIN_MESSAGE);        
     }//GEN-LAST:event_techniquesButtonActionPerformed
-
+    
+    private boolean isPuzzValid(int[][][] in){
+    	boolean fl=true;
+    	for (int group=0;((group<6)&&fl);group++){
+    		for (int row=0;((row<2)&&fl);row++){
+    			for (int col=0;((col<3)&&fl);col++){
+    				if (in[group][row][col]!=0){
+    					//check 1 group
+    					for (int r=0;r<2;r++){
+    						for (int c=0;c<3;c++){
+    							if (((r!=row)||(c!=col))&&(in[group][r][c]==in[group][row][col])){
+    								fl=false;
+    							}
+    						}
+    					}
+    					//check col
+    					for(int g=(group%2);g<6;g+=2) {
+    						for(int r=0;r<2;r++) {
+    							if (((g!=group)||(r!=row))&&(in[g][r][col]==in[group][row][col])){
+    								fl=false;
+    							}
+    						}
+    					}
+    					//check row
+    					for(int g=0;g<2;g++) {
+    						for(int c=0;c<3;c++) {
+    							if ((((g-(g%2))!=group)||(c!=col))&&(in[g-g%2][row][c]==in[group][row][col])){
+    								fl=false;
+    							}
+    						}
+    					}
+    				}
+    			}
+    		}
+    	}
+    	return fl;
+    }
+    
+    final JFileChooser fc = new JFileChooser();
+    
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // ini tombol baru
+		//file chooser
+		if (fc.showOpenDialog(this)==JFileChooser.APPROVE_OPTION) {
+			//init
+			int tmp[][][] = new int[6][2][3];
+			for(int group = 0; group < 6; group++) {
+				for(int row = 0; row < 2; row++) {
+					for(int col = 0; col < 3; col ++) {
+						tmp[group][row][col] = 0;
+					}
+				}
+			}
+			//load file
+			Scanner scanner = null;
+			try {
+				scanner = new Scanner(fc.getSelectedFile());
+				int x=0;
+				char c=' ';
+				for(int groupr=0;groupr<3;groupr++) {
+					for(int row=0;row<2;row++) {
+						for(int groupc=0;groupc<2;groupc++) {
+							for(int col=0;col<3;col++) {
+								c=(char)scanner.next().charAt(0);
+								if (c!='*'){
+									x=(int)c-'0';
+									tmp[groupr*2+groupc][row][col]=x;
+								} else {
+									x=0;
+									tmp[groupr*2+groupc][row][col]=0;
+								}
+							}
+						}
+					}
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if (isPuzzValid(tmp)){
+				sample1Button.setSelected(false);
+				sample2Button.setSelected(false);
+				sample3Button.setSelected(false);
+				customButton.setSelected(true);
+				initializePuzzle(tmp);
+				mode=0;
+				solved=false;
+				solveButton.setEnabled(true);
+			} else {
+			     JOptionPane.showMessageDialog(this,"Puzzle tidak valid","Warning",JOptionPane.ERROR_MESSAGE);
+			}
+		} else {
+			//do nothing
+		}
     }//GEN-LAST:event_jButton1ActionPerformed
 
     public void initializePuzzle(int matriks[][][]){
@@ -500,7 +594,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                         theTable.setValueAt(matriks[group][row][col], row, col);
                     }
                     else {
-                        theTable.setValueAt(null, row, col);
+                        theTable.setValueAt("", row, col);
                     }
                 }
             }
@@ -696,37 +790,31 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
             /* Any character other than the digits 1 to 9 is invalid.  */
             /*=========================================================*/
 
-            if ((theChar != '1') && (theChar != '2') && (theChar != '3') &&
+            /*if ((theChar != '1') && (theChar != '2') && (theChar != '3') &&
                 (theChar != '4') && (theChar != '5') && (theChar != '6') &&
                 (theChar != '7') && (theChar != '8') && (theChar != '9'))
               {
                Toolkit.getDefaultToolkit().beep();
                return;
-              }
-
+              }*/
+            if (!('1'<=theChar)&&(theChar<='6')){
+		    	 Toolkit.getDefaultToolkit().beep();
+		    	 return;
+            }
             /*=====================================*/  
             /* Set the value of the selected cell. */
             /*=====================================*/  
-
-            String theCharStr = Character.toString(theChar);
-            theTable.setValueAt(theCharStr,row,col); 
-
-            /*===========================================*/
+            theTable.setValueAt((int)theChar-'0',row,col); 
             /* Remove any other occurences of this digit */
-            /* from the same 3x3 grid.                   */
-            /*===========================================*/
-
-            for (int r = 0; r < 2; r++)
-              {
-               for (int c = 0; c < 3; c++)
-                 {
-                  if (((r != row) || (c != col)) &&
-                      (theCharStr.equals(theTable.getValueAt(r,c))))
-                    { theTable.setValueAt("",r,c);  }          
-                 }
-              }
-        }
-        else {
+            /* from the same 2x3 grid.                   */
+            for (int r = 0; r < 2; r++){
+        		for (int c = 0; c < 3; c++){
+	   				if (((r != row) || (c != col))&&(theTable.getValueAt(row,col).equals(theTable.getValueAt(r,c)))){
+	   					theTable.setValueAt("",r,c);
+	   				}
+    			}
+            }
+        } else {
             Toolkit.getDefaultToolkit().beep();
         }
     }
