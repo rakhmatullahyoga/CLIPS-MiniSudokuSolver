@@ -47,11 +47,11 @@
    (assert (technique (name Hidden-Single) (rank 6)))
    (assert (technique (name Locked-Candidate-Single-Line) (rank 3)))
    (assert (technique (name Locked-Candidate-Multiple-Lines) (rank 4)))
-   (assert (technique (name Naked-Pairs) (rank 1)))
-   (assert (technique (name Hidden-Pairs) (rank 2)))
+   (assert (technique (name Naked-Pairs) (rank 8)))
+   (assert (technique (name Hidden-Pairs) (rank 9)))
    (assert (technique (name X-Wing) (rank 7)))
-   (assert (technique (name Naked-Triples) (rank 8)))
-   (assert (technique (name Hidden-Triples) (rank 9)))
+   (assert (technique (name Naked-Triples) (rank 2)))
+   (assert (technique (name Hidden-Triples) (rank 1)))
    (assert (technique (name XY-Wing) (rank 10)))
    (assert (technique (name Swordfish) (rank 11)))
    (assert (technique (name Duplicate-Color) (rank 12)))
@@ -617,9 +617,9 @@
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Pairs"))))
 
-;;; *****************
+;;; ********************
 ;;; naked-pairs-diagonal
-;;; *****************
+;;; ********************
 
 (defrule naked-pairs-diagonal
    (phase match)
@@ -713,11 +713,11 @@
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Pairs"))))
 
 
-;;; ******************
+;;; *********************
 ;;; hidden-pairs-diagonal
-;;; ******************
+;;; *********************
 
-(defrule hidden-pairs-group
+(defrule hidden-pairs-diagonal
 
    (phase match)
 
@@ -737,7 +737,7 @@
 
    (possible (value ?v&~?v1&~?v2) (id ?id&?id1 | ?id2) (diagonal ?d &~3))
 
-   (not (impossible (id ?id) (value ?v) (rank ?p)) (diagonal ?d &~3))
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
 
    =>
    
@@ -940,6 +940,40 @@
    
    (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Triples"))))
 
+;;; **********************
+;;; naked-triples-diagonal
+;;; **********************
+
+(defrule naked-triples-diagonal
+
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Naked-Triples) (rank ?p))
+   
+   (triple ?v1 ?v2 ?v3)
+   
+   (possible (value ?v1) (id ?id1) (diagonal ?d &~3))
+   
+   (not (possible (value ~?v1&~?v2&~?v3) (id ?id1) (diagonal ?d &~3)))
+   
+   (possible (value ?v2) (id ?id2&~?id1) (diagonal ?d &~3))
+
+   (not (possible (value ~?v1&~?v2&~?v3) (id ?id2) (diagonal ?d &~3)))
+   
+   (possible (value ?v3) (id ?id3&~?id2&~?id1) (diagonal ?d &~3))
+   
+   (not (possible (value ~?v1&~?v2&~?v3) (id ?id3) (diagonal ?d &~3)))
+   
+   (possible (value ?v& ?v1 | ?v2 | ?v3) (id ?id&~?id1&~?id2&~?id3) (diagonal ?d &~3))
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Naked Triples"))))
+   
 ;;; ##############
 ;;; Hidden Triples
 ;;; ##############
@@ -1027,6 +1061,36 @@
    (not (possible (value ?v1 | ?v2 | ?v3) (id ~?id3&~?id2&~?id1) (group ?g)))
    
    (possible (value ?v&~?v1&~?v2&~?v3) (id ?id& ?id1 | ?id2 | ?id3))
+
+   (not (impossible (id ?id) (value ?v) (rank ?p)))
+
+   =>
+   
+   (assert (impossible (id ?id) (value ?v) (rank ?p) (reason "Hidden Triples"))))
+   
+;;; ***********************
+;;; hidden-triples-diagonal
+;;; ***********************
+
+(defrule hidden-triples-diagonal
+
+   (phase match)
+
+   (rank (value ?p) (process yes))
+
+   (technique (name Hidden-Triples) (rank ?p))
+   
+   (triple ?v1 ?v2 ?v3)
+   
+   (possible (value ?v1) (id ?id1) (group ?g) (diagonal ?d &~3))
+   
+   (possible (value ?v2) (id ?id2&~?id1) (group ?g) (diagonal ?d &~3))
+   
+   (possible (value ?v3) (id ?id3&~?id2&~?id1) (group ?g) (diagonal ?d &~3))
+   
+   (not (possible (value ?v1 | ?v2 | ?v3) (id ~?id3&~?id2&~?id1) (group ?g)) (diagonal ?d &~3))
+   
+   (possible (value ?v&~?v1&~?v2&~?v3) (id ?id& ?id1 | ?id2 | ?id3) (diagonal ?d &~3))
 
    (not (impossible (id ?id) (value ?v) (rank ?p)))
 
