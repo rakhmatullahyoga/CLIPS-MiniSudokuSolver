@@ -1,7 +1,13 @@
 package minisudokux;
 
 /**
- * @author Rakhmatullah Yoga
+ * @author
+ * Kelompok 7 Tugas Besar 1 IF3170
+ * 1. Chrestella Stephanie - 13512005
+ * 2. Linda Sekawati - 13512029
+ * 3. Muntaha Ilmi - 13512048
+ * 4. Rakhmatullah Yoga Sutrisna - 13512053
+ * 5. William Stefan Hartono - 13512098
  */
 import CLIPSJNI.*;
 
@@ -32,9 +38,8 @@ import javax.swing.table.TableColumn;
 
 public class MiniSudoku extends javax.swing.JFrame implements FocusListener, KeyListener{
 
-    /**
-     * Creates new form MiniSudoku
-     */
+    // Creates new form MiniSudoku
+    
     Thread executionThread;
     Environment clips;
     
@@ -50,8 +55,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
     
     public MiniSudoku() {
         super("Mini Sudoku Solver");
-        
-        
+    
         // inisiasi puzzle
         for(int group = 0; group < 6; group++) {
             for(int row = 0; row < 2; row++) {
@@ -128,7 +132,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        GridLayout theLayout = new GridLayout(3,3);
+        GridLayout theLayout = new GridLayout(3,2);
         theLayout.setHgap(-1);
         theLayout.setVgap(-1); 
 
@@ -182,7 +186,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                   public boolean isCellEditable(int rowIndex,int vColIndex) 
                     { return false; }
                  };
-              
+            
             theSubGrid.setRowSelectionAllowed(false);
             theSubGrid.setShowGrid(true);
             theSubGrid.setRowHeight(25);
@@ -395,10 +399,12 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
         buff+="(retract ?f)\n";
         buff+="(assert (phase expand-any))\n";
         buff+="(assert (size 3))\n";
+
          /*======================================*/
          /* Remember the initial starting values */
          /* of the puzzle for the reset command. */
          /*======================================*/
+
          Object activeMatriks[][][] = new Object[6][2][3];
          for (int group = 0; group < 6; group++)
            {
@@ -440,6 +446,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
          buff+=")";
          clips.build(buff);
          clips.reset();
+
          /*===================================*/
          /* Update the status of the buttons. */
          /*===================================*/
@@ -472,21 +479,15 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
          for (int i = 1; i <= tNum; i++)
            {
              try {
-                 evalStr = "(find-fact ((?f technique-employed)) " +
-                         "(eq ?f:rank " + i + "))";
-                 
+                 evalStr = "(find-fact ((?f technique-employed)) " + "(eq ?f:rank " + i + "))";
                  pv = clips.eval(evalStr);
                  if (pv.size() == 0) continue;
-                 
                  pv = pv.get(0);
-                 
-                 messageStr = messageStr + pv.getFactSlot("rank").intValue() + ". " +
-                         pv.getFactSlot("reason").stringValue() + "<br>";
+                 messageStr = messageStr + pv.getFactSlot("rank").intValue() + ". " + pv.getFactSlot("reason").stringValue() + "<br>";
              } catch (Exception ex) {
                  Logger.getLogger(MiniSudoku.class.getName()).log(Level.SEVERE, null, ex);
              }
            }
-        
          JOptionPane.showMessageDialog(this,messageStr,"SolutionTechniques",JOptionPane.PLAIN_MESSAGE);        
     }//GEN-LAST:event_techniquesButtonActionPerformed
     
@@ -527,7 +528,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
     	return fl;
     }
     
-    final JFileChooser fc = new JFileChooser();
+    final JFileChooser fc = new JFileChooser("..");
     
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 		//file chooser
@@ -600,6 +601,7 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
             }
         }
     }
+
    /*************/
    /* runSudoku */
    /*************/  
@@ -637,9 +639,11 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
      }
     private void updateGrid() throws Exception
      { 
+
       /*===================================*/
       /* Retrieve the solution from CLIPS. */
       /*===================================*/
+
       Object activeMatriks[][][] = new Object[6][2][3];
       for(int group=0; group<6; group++) {
             JTable theTable = (JTable) mainGrid.getComponent(group);
@@ -650,21 +654,15 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                     activeMatriks[group][row][col] = theTable.getValueAt(row,col);
                     if ((activeMatriks[group][row][col] != null) && (!activeMatriks[group][row][col].equals("")))
                     { continue; }
-                    
-                    String evalStr = "(find-all-facts ((?f possible)) " +
-                                       "(and (eq ?f:row " + (row + (rowGroup * 2) + 1) + ") " +
-                                            "(eq ?f:column " + (col + (colGroup * 3) + 1) + ")))";
+                    String evalStr = "(find-all-facts ((?f possible)) " + "(and (eq ?f:row " + (row + (rowGroup * 2) + 1) + ") " + "(eq ?f:column " + (col + (colGroup * 3) + 1) + ")))";
                     PrimitiveValue pv = clips.eval(evalStr);
-
                     if (pv.size() != 1) continue;
-
                     PrimitiveValue fv = pv.get(0);
                     theTable.setValueAt(" " + fv.getFactSlot("value") + " ",row,col);
                 }
             }
         }
       
-
       /*===============================================*/
       /* Any cells that have not been assigned a value */
       /* are given a '?' for their content.            */
@@ -693,7 +691,6 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
          
       solved = true;
       clearButton.setEnabled(true);
-      //resetButton.setEnabled(true);
       solveButton.setEnabled(false);
       techniquesButton.setEnabled(true);
            
@@ -701,15 +698,12 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
       
       isExecuting = false;
      }
+
     /**
      * @param args the command line arguments
      */
+
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -790,20 +784,15 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
             /* Any character other than the digits 1 to 9 is invalid.  */
             /*=========================================================*/
 
-            /*if ((theChar != '1') && (theChar != '2') && (theChar != '3') &&
-                (theChar != '4') && (theChar != '5') && (theChar != '6') &&
-                (theChar != '7') && (theChar != '8') && (theChar != '9'))
-              {
-               Toolkit.getDefaultToolkit().beep();
-               return;
-              }*/
-            if (!('1'<=theChar)&&(theChar<='6')){
+            if (!(('1'<=theChar)&&(theChar<='6'))){
 		    	 Toolkit.getDefaultToolkit().beep();
 		    	 return;
             }
+            
             /*=====================================*/  
             /* Set the value of the selected cell. */
             /*=====================================*/  
+            
             theTable.setValueAt((int)theChar-'0',row,col); 
             /* Remove any other occurences of this digit */
             /* from the same 2x3 grid.                   */
