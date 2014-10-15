@@ -157,15 +157,6 @@ public class MiniSudoku extends javax.swing.JFrame implements FocusListener, Key
                if (comp instanceof JLabel)
                  { 
                   ((JLabel) comp).setHorizontalAlignment(JLabel.CENTER); 
-                  if (value instanceof String)
-                    { 
-                     if ("?".equals(value))
-                       { ((JLabel) comp).setForeground(Color.red); }
-                     else if (((String) value).length() > 1)
-                       { ((JLabel) comp).setForeground(Color.green.darker()); }
-                     else
-                       { ((JLabel) comp).setForeground(Color.black); }
-                    }
                  }
                return comp;
               }

@@ -8,3 +8,4 @@ bin/minisudokux/MiniSudoku.form
 bin/minisudokux/SudokuDemo.class
 */*.class
 *.class
+/dist/

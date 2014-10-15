@@ -1082,13 +1082,13 @@
    
    (triple ?v1 ?v2 ?v3)
    
-   (possible (value ?v1) (id ?id1) (group ?g) (diagonal ?d &~3))
+   (possible (value ?v1) (id ?id1) (diagonal ?d &~3))
    
-   (possible (value ?v2) (id ?id2&~?id1) (group ?g) (diagonal ?d &~3))
+   (possible (value ?v2) (id ?id2&~?id1) (diagonal ?d &~3))
    
-   (possible (value ?v3) (id ?id3&~?id2&~?id1) (group ?g) (diagonal ?d &~3))
+   (possible (value ?v3) (id ?id3&~?id2&~?id1) (diagonal ?d &~3))
    
-   (not (possible (value ?v1 | ?v2 | ?v3) (id ~?id3&~?id2&~?id1) (group ?g)) (diagonal ?d &~3))
+   (not (possible (value ?v1 | ?v2 | ?v3) (id ~?id3&~?id2&~?id1) (diagonal ?d &~3)))
    
    (possible (value ?v&~?v1&~?v2&~?v3) (id ?id& ?id1 | ?id2 | ?id3) (diagonal ?d &~3))
 
